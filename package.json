@@ -1,0 +1,20 @@
+{
+  "devDependencies": {
+    "@types/mime": "^3.0.3",
+    "@types/node": "^20.8.9",
+    "concurrently": "^8.2.2",
+    "copy-and-watch": "^0.1.6",
+    "node-dev": "^8.0.0",
+    "prettier": "^3.0.3",
+    "serve": "^14.2.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"NODE,TSC ,COPY\" --prefix-colors \"magenta,blue,yellow\" \"PUBLIC_PATH=./dist/public node-dev --watch --respawn --loader ts-node/esm --inspect src/server.ts\" \"tsc --watch --project tsconfig.json\" \"copy-and-watch --watch src/public/**/*.{ico,html} dist/public\""
+  },
+  "dependencies": {
+    "mime": "^3.0.0"
+  }
+}
