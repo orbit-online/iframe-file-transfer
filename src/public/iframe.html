@@ -64,7 +64,7 @@
 			padding: 1rem;
 		}
 	</style>
-	<script src="http://localhost:3000/receiver.js" type="module"></script>
+	<script src="/receiver.js" type="module"></script>
 	<script type="module">
 		/**
 		 * If simple value "data-binding" in the form isn't sufficient
@@ -108,36 +108,37 @@
 		<input type="hidden" name="orbitFileId" data-orbit-file-receiver-file-id required />
 		<label>
 			<span>Project number</span>
-			<input type="text" disabled name="projectNumber" data-orbit-file-receiver-entity-data-value="master.project_number" />
+			<input type="text" disabled name="projectNumber" data-orbit-file-receiver-entity-data-value="externalId" />
 		</label>
 		<label>
 			<span>Project name</span>
-			<input type="text" disabled name="projectName" data-orbit-file-receiver-entity-data-value="master.project_name" />
+			<input type="text" disabled name="projectName" data-orbit-file-receiver-entity-data-value="projectName" />
 		</label>
 		<label>
 			<span>Project start</span>
-			<input type="date" disabled name="projectStart" data-orbit-file-receiver-entity-data-value="master.project_start" />
+			<input type="date" disabled name="projectStart" data-orbit-file-receiver-entity-data-value="projectStart" />
 		</label>
 		<label>
 			<span>Project end</span>
-			<input type="date" disabled name="projectEnd" data-orbit-file-receiver-entity-data-value="master.project_end" />
+			<input type="date" disabled name="projectEnd" data-orbit-file-receiver-entity-data-value="projectEnd" />
 		</label>
 		<label>
 			<span>File</span>
 			<input
-			data-orbit-file-receiver-input
-			name="file"
-			required
-			type="file"
+				data-orbit-file-receiver-input
+				name="file"
+				required
+				type="file"
 			/>
 			<progress
-			data-orbit-file-receiver-progress
-			max="100"
-			value="0"
-			></progress>
+				data-orbit-file-receiver-progress
+				max="100"
+				value="0"
+			>
+			</progress>
 			<img
-			data-orbit-file-receiver-image
-			src=""
+				data-orbit-file-receiver-image
+				src=""
 			/>
 		</label>
 
@@ -156,6 +157,7 @@
 		</label>
 
 		<div style="grid-column:2/3;justify-self:end;">
+			<input type="button" value="Cancel" data-orbit-file-receiver-cancel />
 			<input type="submit" value="Upload" />
 		</div>
 

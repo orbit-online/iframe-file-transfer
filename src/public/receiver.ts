@@ -212,9 +212,13 @@ window.addEventListener(
 			const entityDataContainer = document.querySelector<HTMLPreElement>(
 				'pre[data-orbit-file-receiver-entity-data]',
 			);
+			const cancel = document.querySelector<HTMLInputElement>('input[type=button][data-orbit-file-receiver-cancel]');
 			const image = document.querySelector<HTMLImageElement>('img[data-orbit-file-receiver-image]');
 			const progress = document.querySelector<HTMLProgressElement>('progress[data-orbit-file-receiver-progress]');
 
+			cancel == null
+				? logger.debug('<input type=button /> Cancel button element not found, skipping...')
+				: logger.debug('<input type=button /> Cancel button element found.');
 			image == null
 				? logger.debug('<img /> Image preview element not found, skipping...')
 				: logger.debug('<img /> Image preview element found.');
@@ -226,11 +230,18 @@ window.addEventListener(
 				? logger.debug('<pre /> Entity data container not found, skipping...')
 				: logger.debug('<pre /> Entity data container found.');
 
+			fileIdInput.disabled = true;
 			fileInput.setAttribute('type', 'text');
 			fileInput.disabled = true;
 			fileInput.required = true;
 
 			let state: Maybe<State> = null;
+
+			if (cancel != null) {
+				cancel.addEventListener('click', () => {
+					state?.outgoingPort.postMessage({ event: 'cancel' });
+				}, { passive: false });
+			}
 
 			form.addEventListener(
 				'submit',
@@ -370,14 +381,18 @@ window.addEventListener(
 				);
 			});
 
-			await Promise.race([
-				connect,
-				rejectAfter(
-					3000,
-					`Connection to orbit host was not established within 3000ms, please verify if the data-orbit-origin URL hash has the correct value, the currently provided value is: "${orbitOrigin}".`,
-					OrbitIframeFileTransferReceiverError,
-				),
-			]);
+			if (window.location.hash.includes('skipTimeoutCheck=true')) {
+				await connect;
+			} else {
+				await Promise.race([
+					connect,
+					rejectAfter(
+						3000,
+						`Connection to orbit host was not established within 3000ms, please verify if the data-orbit-origin URL hash has the correct value, the currently provided value is: "${orbitOrigin}".`,
+						OrbitIframeFileTransferReceiverError,
+					),
+				]);
+			}
 		} catch (err) {
 			if (err instanceof Error) {
 				errorContainer == null
