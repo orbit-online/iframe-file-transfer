@@ -12,7 +12,12 @@ export class OrbitIframeFileTransferReceiverError extends OrbitIframeFileTransfe
 	}
 }
 
-export type SubmitHandler = <E, R>(url: string, method: string, formData: FormData, orbitEntityData: E) => Promise<R>;
+export type SubmitHandler = (
+	url: string,
+	method: string,
+	formData: FormData,
+	orbitEntityData: Record<string, number | string | boolean | null | undefined>,
+) => Promise<unknown>;
 
 const querySelectorOne = <TElement extends Element = Element>(selector: string, errorMessage: string): TElement => {
 	try {
@@ -89,7 +94,7 @@ E.g. <div className="..." data-orbit-file-receiver-error-container></div>`,
 	return errorContainer;
 };
 
-const tryGetFromElement = (): HTMLFormElement =>
+const tryGetFormElement = (): HTMLFormElement =>
 	querySelectorOne<HTMLFormElement>(
 		'form[data-orbit-file-receiver]',
 		`<form /> element wasn't found, there must exist a <form /> element in the DOM with the data-orbit-file-receiver assigned to the name of a submit handler function present in global scope.
@@ -174,7 +179,7 @@ method="post"
 	return submitHandler;
 };
 
-const tryGetOriginFromUrlHash = (hash: string): string => {
+export const tryGetOriginFromUrlHash = (hash: string): string => {
 	if (!hash.includes('data-orbit-origin=')) {
 		throw new OrbitIframeFileTransferReceiverError(
 			`The orbit host should provide the origin via the [hash] part of the URL in the iframe source, it appears that it hasn't, please contact Orbit about this error,
@@ -201,7 +206,7 @@ window.addEventListener(
 		try {
 			errorContainer = tryGetErrorContainerElement();
 
-			const form = tryGetFromElement();
+			const form = tryGetFormElement();
 			const fileIdInput = tryGetFileIdInputElement();
 			const fileInput = tryGetFileInputElement();
 			const submitHandler = tryGetSubmitHandler(form);
@@ -212,7 +217,9 @@ window.addEventListener(
 			const entityDataContainer = document.querySelector<HTMLPreElement>(
 				'pre[data-orbit-file-receiver-entity-data]',
 			);
-			const cancel = document.querySelector<HTMLInputElement>('input[type=button][data-orbit-file-receiver-cancel]');
+			const cancel = document.querySelector<HTMLInputElement>(
+				'input[type=button][data-orbit-file-receiver-cancel]',
+			);
 			const image = document.querySelector<HTMLImageElement>('img[data-orbit-file-receiver-image]');
 			const progress = document.querySelector<HTMLProgressElement>('progress[data-orbit-file-receiver-progress]');
 
@@ -238,9 +245,13 @@ window.addEventListener(
 			let state: Maybe<State> = null;
 
 			if (cancel != null) {
-				cancel.addEventListener('click', () => {
-					state?.outgoingPort.postMessage({ event: 'cancel' });
-				}, { passive: false });
+				cancel.addEventListener(
+					'click',
+					() => {
+						state?.outgoingPort.postMessage({ event: 'cancel' });
+					},
+					{ passive: false },
+				);
 			}
 
 			form.addEventListener(
