@@ -1,0 +1,19 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"declarationMap": false,
+		"outDir": "./packages/iframe-file-transfer",
+		"sourceMap": false
+	},
+	"include": [],
+	"files": [
+		"./src/public/react/sender.ts",
+		"./src/public/react/receiver.ts",
+		"./src/public/vanilla/sender.ts",
+		"./src/public/vanilla/receiver.ts",
+		"./src/public/global.d.ts",
+		"./src/public/receiver.ts",
+		"./src/public/sender.ts",
+		"./src/public/util.ts",
+	]
+}
