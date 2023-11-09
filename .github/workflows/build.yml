@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - '*'
+    tags:
+    - '*'
+    - '!v*' # Don't run on version tags, instead the release workflow will include this file and call the build step
+  workflow_call: {}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .npmrc
+      run: cp tools/_.npmrc .npmrc
+    - name: Cache node_modules/
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: node_modules
+    - name: Install node_modules/
+      uses: docker://node:16.18.0-alpine3.16
+      with:
+        args: yarn --silent install --frozen-lockfile
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN_RO }}
+    - name: Build the release
+      uses: docker://node:16.18.0-alpine3.16
+      with:
+        entrypoint: tools/build.sh
+    - name: Create compilation artifact
+      run: tar -cf ../dist.tar *
+      working-directory: dist
+    - uses: actions/upload-artifact@v3
+      with:
+        name: dist.tar
+        path: dist.tar
+        retention-days: 1

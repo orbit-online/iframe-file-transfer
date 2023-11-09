@@ -1,7 +1,12 @@
 {
 	"name": "@orbit-online/iframe-file-transfer",
 	"private": true,
-	"version": "1.0.0-beta",
+	"author": {
+		"email": "opensource@orbit.online",
+		"name": "Orbit Online A/S",
+		"url": "https://orbit.online"
+	},
+	"bugs": "https://github.com/orbit-online/iframe-file-transfer/issues/new",
 	"devDependencies": {
 		"@rushstack/eslint-patch": "^1.5.1",
 		"@secoya/eslint-plugin-orbit": "^2.1.2",
@@ -15,6 +20,7 @@
 		"concurrently": "^8.2.2",
 		"copy-and-watch": "^0.1.6",
 		"eslint": "^8.53.0",
+		"mime": "^3.0.0",
 		"node-dev": "^8.0.0",
 		"prettier": "^3.0.3",
 		"serve": "^14.2.1",
@@ -22,13 +28,13 @@
 		"tsup": "^7.2.0",
 		"typescript": "4.8.4"
 	},
-	"type": "module",
+	"homepage": "https://github.com/orbit-online/iframe-file-transfer",
+	"keywords": ["orbit", "iframe", "file-transfer", "integration"],
+	"license": "MIT",
 	"scripts": {
 		"dev": "concurrently --kill-others-on-fail --names \"NODE,TSC ,COPY\" --prefix-colors \"magenta,blue,yellow\" \"PUBLIC_PATH=./dist/public node-dev --watch --respawn --loader ts-node/esm --inspect src/server.ts\" \"tsc --watch --project tsconfig.json\" \"copy-and-watch --watch public/**/*.{css,ico,html} dist/public\""
 	},
-	"dependencies": {
-		"mime": "^3.0.0"
-	},
+	"type": "module",
 	"tsup": {
 		"clean": true,
 		"dts": true,
