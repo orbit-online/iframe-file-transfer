@@ -1,10 +1,10 @@
-import { createLogger } from '../util.js';
 import {
 	OrbitIframeFileTransferReceiver,
 	OrbitIframeFileTransferReceiverError,
 	SubmitHandler,
 	tryGetOriginFromUrlHash,
-} from '../receiver.js';
+} from '../lib/receiver.js';
+import { createLogger } from '../lib/util.js';
 
 export function useOrbitIframeFileTransferReceiver(
 	errorHandler: (err: Maybe<Error>) => void,
@@ -115,12 +115,17 @@ e.g.
 			const orbitOrigin = tryGetOriginFromUrlHash(window.location.hash);
 			form.setAttribute('data-orbit-origin', orbitOrigin);
 
-			imageRef.current == null
-				? logger.debug('<img /> Image preview element not found, skipping...')
-				: logger.debug('<img /> Image preview element found.');
-			progressRef.current == null
-				? logger.debug('<progress /> File transfer progress indicator element not found, skipping...')
-				: logger.debug('<progress /> File transfer progress indicator element found.');
+			if (imageRef.current == null) {
+				logger.debug('<img /> Image preview element not found, skipping...');
+			} else {
+				logger.debug('<img /> Image preview element found.');
+			}
+
+			if (progressRef.current == null) {
+				logger.debug('<progress /> File transfer progress indicator element not found, skipping...');
+			} else {
+				logger.debug('<progress /> File transfer progress indicator element found.');
+			}
 
 			form.onsubmit = receiver.createSubmitHandler(fileInput);
 			receiver.connect().catch(errorHandler);
@@ -130,7 +135,7 @@ e.g.
 		return () => receiver.close();
 	}, []);
 
-	const onCancel = React.useCallback((e: React.MouseEvent<any>) => receiver.cancel(), [receiver]);
+	const onCancel = React.useCallback((_evt: React.MouseEvent<any>) => receiver.cancel(), [receiver]);
 
 	return {
 		fileIdInputRef,

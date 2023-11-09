@@ -25,8 +25,8 @@ export function createIframeHandler(
 		return null;
 	}
 
-	return (evt: React.SyntheticEvent<HTMLIFrameElement> | Event) => {
-		const iframe = evt.currentTarget as EventTarget & HTMLIFrameElement;
+	return (event: React.SyntheticEvent<HTMLIFrameElement> | Event) => {
+		const iframe = event.currentTarget as EventTarget & HTMLIFrameElement;
 		const { contentWindow } = iframe;
 		if (contentWindow === null) {
 			throw new OrbitIframeFileSenderError('contentWindow is not present in iframe.');
@@ -61,12 +61,10 @@ export function createIframeHandler(
 					onComplete();
 					break;
 				}
-				case 'cancel':
+				case 'cancel': {
 					onCancel();
 					break;
-
-				default:
-					debugger;
+				}
 			}
 		};
 

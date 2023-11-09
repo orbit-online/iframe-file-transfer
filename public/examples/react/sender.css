@@ -1,5 +1,14 @@
-html, body { height: 100%; box-sizing: border-box; margin: 0; padding: 0; }
-body { display: flex; flex-direction: column; }
+html,
+body {
+	height: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+body {
+	display: flex;
+	flex-direction: column;
+}
 
 #root {
 	flex: 1 0 0%;
@@ -42,4 +51,15 @@ iframe {
 	padding: 0.5rem;
 	border: 1px solid #1a1a1a;
 	width: 600px;
+}
+
+.back-link {
+	font-size: 1.5rem;
+}
+.back-link,
+.back-link:hover {
+	text-decoration: none;
+}
+.back-link:hover .back-link {
+	text-decoration: underline;
 }

@@ -20,10 +20,7 @@ export type SubmitHandler = (
 	orbitEntityData: Record<string, number | string | boolean | null | undefined>,
 ) => Promise<unknown>;
 
-export const querySelectorOne = <TElement extends Element = Element>(
-	selector: string,
-	errorMessage: string,
-): TElement => {
+export function querySelectorOne<TElement extends Element = Element>(selector: string, errorMessage: string): TElement {
 	try {
 		return querySelectorOneBase<TElement>(selector, OrbitIframeFileTransferReceiverError);
 	} catch (err) {
@@ -32,24 +29,24 @@ export const querySelectorOne = <TElement extends Element = Element>(
 		}
 		throw err;
 	}
-};
+}
 
 interface OrbitInitMessage {
 	readonly apiVersion: number;
-	readonly event: 'online.orbit::iframe_file_transfer#init';
 	readonly entityData: Record<string, any>;
-	readonly orbitFileId: string;
+	readonly event: 'online.orbit::iframe_file_transfer#init';
 	readonly fileName: string;
 	readonly lastModified: number;
 	readonly mimeType: string;
+	readonly orbitFileId: string;
 	readonly size: number;
 }
 
 interface OrbitFileChunkMessage {
+	readonly done: boolean;
 	readonly event: 'online.orbit::iframe_file_transfer#file_chunk';
 	readonly idx: number;
 	readonly value: string;
-	readonly done: boolean;
 }
 
 type OrbitMessage = OrbitInitMessage | OrbitFileChunkMessage;
@@ -68,15 +65,18 @@ const allOrbitMessageEvents = [
 	'online.orbit::iframe_file_transfer#file_chunk',
 ] as const;
 
-const isOrbitMessage = (evt: any): evt is OrbitMessageEvent =>
-	typeof evt === 'object' &&
-	evt != null &&
-	typeof evt.data === 'object' &&
-	evt.data != null &&
-	typeof evt.data.event === 'string' &&
-	allOrbitMessageEvents.includes(evt.data.event);
+function isOrbitMessage(evt: any): evt is OrbitMessageEvent {
+	return (
+		typeof evt === 'object' &&
+		evt != null &&
+		typeof evt.data === 'object' &&
+		evt.data != null &&
+		typeof evt.data.event === 'string' &&
+		allOrbitMessageEvents.includes(evt.data.event)
+	);
+}
 
-const decodeChunk = (chunk: string): Uint8Array => {
+function decodeChunk(chunk: string): Uint8Array {
 	const byteString = atob(chunk);
 	let idx = byteString.length;
 	const u8arr = new Uint8Array(idx);
@@ -84,9 +84,9 @@ const decodeChunk = (chunk: string): Uint8Array => {
 		u8arr[idx] = byteString.charCodeAt(idx);
 	}
 	return u8arr;
-};
+}
 
-export const tryGetOriginFromUrlHash = (hash: string): string => {
+export function tryGetOriginFromUrlHash(hash: string): string {
 	if (!hash.includes('data-orbit-origin=')) {
 		throw new OrbitIframeFileTransferReceiverError(
 			`The orbit host should provide the origin via the [hash] part of the URL in the iframe source, it appears that it hasn't, please contact Orbit about this error,
@@ -101,18 +101,18 @@ it can be provded like this from the host
 			.map((pair) => pair.split('=').map((kv) => decodeURIComponent(kv)) as [string, string]),
 	);
 	return urlHashParts['data-orbit-origin'];
-};
+}
 
 export class OrbitIframeFileTransferReceiver {
-	private readonly logger: Logger;
-	private readonly orbitOrigin: string;
-	private state: Maybe<State> = null;
 	private disconnect: (() => void) | null = null;
+	private readonly logger: Logger;
 	private readonly onError: (err: Error) => void;
 	private readonly onFileChunkReceived?: (bytesReceived: number, totalSize: number, chunkSize: number) => void;
 	private readonly onFileTransferCompleted?: (file: File) => void;
 	private readonly onFileTransferInit: (msg: OrbitInitMessage) => void;
 	private readonly onFormSubmit: SubmitHandler;
+	private readonly orbitOrigin: string;
+	private state: Maybe<State> = null;
 
 	public constructor(initObject: {
 		onError: OrbitIframeFileTransferReceiver['onError'];
@@ -148,7 +148,10 @@ export class OrbitIframeFileTransferReceiver {
 	}
 
 	public async connect(): Promise<() => void> {
-		let disconnect = () => {};
+		let disconnect = () => {
+			return;
+		};
+
 		const connect = new Promise<void>((resolve) => {
 			const onMessage = async (evt: MessageEvent<any>) => {
 				if (evt.origin !== this.orbitOrigin || !isOrbitMessage(evt)) {
@@ -233,12 +236,15 @@ export class OrbitIframeFileTransferReceiver {
 			window.addEventListener('message', onMessage, { passive: true });
 			disconnect = () => {
 				window.removeEventListener('message', onMessage);
-				disconnect = () => {};
+				disconnect = () => {
+					return;
+				};
 			};
 		});
 
 		try {
 			if (window.location.hash.includes('skipTimeoutCheck=true')) {
+				// eslint-disable-next-line @secoya/orbit/proper-promise-use
 				await connect;
 			} else {
 				await Promise.race([
@@ -268,6 +274,11 @@ export class OrbitIframeFileTransferReceiver {
 	): NonNullable<GlobalEventHandlers['onsubmit']>;
 	public createSubmitHandler(fileInput: HTMLInputElement, _handlerType?: 'react' | 'native') {
 		const self = this;
+		// returning a plain old function instead of an arrow function here
+		// to support assigned this result to a DOM element.
+		//
+		// const form = document.createElement('form');
+		// form.onsubmit = createSubmitHandler('native');
 		return async function onsubmit(evt: SubmitEvent | React.FormEvent<HTMLFormElement>) {
 			evt.preventDefault();
 			const state = self.state;

@@ -1,17 +1,23 @@
-import http, { IncomingMessage, RequestListener, ServerResponse } from 'node:http';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { createReadStream } from 'node:fs';
 import mime from 'mime';
+import { createReadStream } from 'node:fs';
+import fs from 'node:fs/promises';
+import http, { IncomingMessage, RequestListener, ServerResponse } from 'node:http';
+import path from 'node:path';
 
 // const __filename = new URL('', import.meta.url).pathname;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const __dirname = new URL('.', import.meta.url).pathname;
 
 const logger = {
+	// eslint-disable-next-line no-console
 	debug: (msg?: any, ...optionalParams: any[]): void => console.debug(`[server] ${msg}`, ...optionalParams),
+	// eslint-disable-next-line no-console
 	error: (msg?: any, ...optionalParams: any[]): void => console.error(`[server] ${msg}`, ...optionalParams),
+	// eslint-disable-next-line no-console
 	info: (msg?: any, ...optionalParams: any[]): void => console.info(`[server] ${msg}`, ...optionalParams),
+	// eslint-disable-next-line no-console
 	log: (msg?: any, ...optionalParams: any[]): void => console.log(`[server] ${msg}`, ...optionalParams),
+	// eslint-disable-next-line no-console
 	warn: (msg?: any, ...optionalParams: any[]): void => console.warn(`[server] ${msg}`, ...optionalParams),
 } as const;
 
@@ -40,8 +46,11 @@ const handler: RequestListener<typeof IncomingMessage, typeof ServerResponse> = 
 		case 'GET': {
 			try {
 				const url = new URL(req.url, baseUrl);
+				logger.info(url.pathname);
 				const filePath = url.pathname.startsWith('/src/public/')
 					? path.join(__dirname, '..', url.pathname)
+					: url.pathname.startsWith('/src/')
+					? path.join(PUBLIC_PATH, '..', url.pathname)
 					: path.join(PUBLIC_PATH, url.pathname === '/' ? 'index.html' : url.pathname);
 				const fileStat = await fs.stat(filePath);
 				if (fileStat.isFile()) {
@@ -83,7 +92,7 @@ async function main(): Promise<void> {
 		logger.info(`Serving: ${baseUrl}`);
 	});
 	server2.listen(3001, () => {
-		logger.info(`Listening on ::3001`);
+		logger.info('Listening on ::3001');
 	});
 }
 

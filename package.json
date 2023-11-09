@@ -1,25 +1,50 @@
 {
-  "name": "@orbit-online/iframe-file-transfer",
-  "private": true,
-  "version": "1.0.0-beta",
-  "devDependencies": {
-    "@types/mime": "^3.0.3",
-    "@types/node": "^20.8.9",
-    "@types/react": "^18.2.36",
-    "@types/react-dom": "^18.2.14",
-    "concurrently": "^8.2.2",
-    "copy-and-watch": "^0.1.6",
-    "node-dev": "^8.0.0",
-    "prettier": "^3.0.3",
-    "serve": "^14.2.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
-  },
-  "type": "module",
-  "scripts": {
-    "dev": "concurrently --kill-others-on-fail --names \"NODE,TSC ,COPY\" --prefix-colors \"magenta,blue,yellow\" \"PUBLIC_PATH=./dist/public node-dev --watch --respawn --loader ts-node/esm --inspect src/server.ts\" \"tsc --watch --project tsconfig.json\" \"copy-and-watch --watch src/public/**/*.{css,ico,html} dist/public\""
-  },
-  "dependencies": {
-    "mime": "^3.0.0"
-  }
+	"name": "@orbit-online/iframe-file-transfer",
+	"private": true,
+	"version": "1.0.0-beta",
+	"devDependencies": {
+		"@rushstack/eslint-patch": "^1.5.1",
+		"@secoya/eslint-plugin-orbit": "^2.1.2",
+		"@secoya/prettier-config": "^1.0.0",
+		"@types/mime": "^3.0.3",
+		"@types/node": "^20.8.9",
+		"@types/react": "^18.2.37",
+		"@types/react-dom": "^18.2.15",
+		"@typescript-eslint/eslint-plugin": "^6.10.0",
+		"@typescript-eslint/parser": "^6.10.0",
+		"concurrently": "^8.2.2",
+		"copy-and-watch": "^0.1.6",
+		"eslint": "^8.53.0",
+		"node-dev": "^8.0.0",
+		"prettier": "^3.0.3",
+		"serve": "^14.2.1",
+		"ts-node": "^10.9.1",
+		"tsup": "^7.2.0",
+		"typescript": "4.8.4"
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "concurrently --kill-others-on-fail --names \"NODE,TSC ,COPY\" --prefix-colors \"magenta,blue,yellow\" \"PUBLIC_PATH=./dist/public node-dev --watch --respawn --loader ts-node/esm --inspect src/server.ts\" \"tsc --watch --project tsconfig.json\" \"copy-and-watch --watch public/**/*.{css,ico,html} dist/public\""
+	},
+	"dependencies": {
+		"mime": "^3.0.0"
+	},
+	"tsup": {
+		"clean": true,
+		"dts": true,
+		"entry": [
+			"./src/lib/receiver.ts",
+			"./src/lib/sender.ts",
+			"./src/react/receiver.ts",
+			"./src/react/sender.ts",
+			"./src/vanilla/receiver.ts",
+			"./src/vanilla/sender.ts"
+		],
+		"external": ["tsup"],
+		"format": ["cjs", "esm"],
+		"sourcemap": true,
+		"splitting": false,
+		"target": "es2022",
+		"tsconfig": "./tsconfig.build.json"
+	}
 }

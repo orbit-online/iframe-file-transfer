@@ -1,0 +1,14 @@
+{
+	"extends": "./tsconfig.json",
+	"include": [],
+	"files": [
+		"./src/global.d.ts",
+		"./src/lib/receiver.ts",
+		"./src/lib/sender.ts",
+		"./src/lib/util.ts",
+		"./src/react/sender.ts",
+		"./src/react/receiver.ts",
+		"./src/vanilla/sender.ts",
+		"./src/vanilla/receiver.ts"
+	]
+}

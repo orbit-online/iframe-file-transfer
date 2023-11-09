@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>iframe</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="stylesheet" type="text/css" href="./iframe.css" />
+		<script src="./iframe.js" type="module"></script>
+		<script type="module">
+			/**
+			 * If simple value "data-binding" in the form isn't sufficient
+			 * you can yield to set values imperativly through the [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) Web API
+			 * and the `orbitEntityData` object.
+			 *
+			 * @example
+			 * formData.set('complexValue', orbitEntityData['master.client_list']);
+			 *
+			 * @param {string} url
+			 * @param {string} method
+			 * @param {FormData} formData
+			 * @param {Record<string, any>} orbitEntityData
+			 */
+			async function onOrbitFileReceiverFormSubmit(url, method, formData, orbitEntityData) {
+				const request = new Request(url, {
+					method,
+					body: formData,
+				});
+
+				const response = await fetch(request);
+				const result = await response.json();
+
+				return {
+					id: result.id,
+					orbitFileId: formData.get('orbitFileId'),
+				};
+			}
+			globalThis.onOrbitFileReceiverFormSubmit = onOrbitFileReceiverFormSubmit;
+		</script>
+	</head>
+	<body>
+		<form
+			data-orbit-file-receiver="onOrbitFileReceiverFormSubmit"
+			action="/upload"
+			enctype="multipart/form-data"
+			method="post">
+			<div data-orbit-file-receiver-error-container></div>
+			<input type="hidden" name="orbitFileId" data-orbit-file-receiver-file-id required />
+			<label>
+				<span>Project number</span>
+				<input
+					type="text"
+					readonly
+					name="projectNumber"
+					data-orbit-file-receiver-entity-data-value="externalId" />
+			</label>
+			<label>
+				<span>Project name</span>
+				<input
+					type="text"
+					readonly
+					name="projectName"
+					data-orbit-file-receiver-entity-data-value="projectName" />
+			</label>
+			<label>
+				<span>Project start</span>
+				<input
+					type="date"
+					readonly
+					name="projectStart"
+					data-orbit-file-receiver-entity-data-value="projectStart" />
+			</label>
+			<label>
+				<span>Project end</span>
+				<input type="date" readonly name="projectEnd" data-orbit-file-receiver-entity-data-value="projectEnd" />
+			</label>
+			<label>
+				<span>File</span>
+				<input data-orbit-file-receiver-input name="file" required type="file" />
+				<progress data-orbit-file-receiver-progress max="100" value="0"></progress>
+				<img data-orbit-file-receiver-image src="" />
+			</label>
+
+			<label>
+				<span>Picture taken at</span>
+				<input type="date" name="pictureTakenAt" required />
+			</label>
+
+			<label>
+				<span>Keywords</span>
+				<select name="keywords[]" multiple>
+					<option value="advisor">Advisor</option>
+					<option value="construction">Construction</option>
+					<option value="highlighted">Highlighted</option>
+				</select>
+			</label>
+
+			<div style="grid-column: 2/3; justify-self: end">
+				<input type="button" value="Cancel" data-orbit-file-receiver-cancel />
+				<input type="submit" value="Upload" />
+			</div>
+
+			<div style="display: flex; flex-direction: column; grid-column: 1/3">
+				<h2>Orbit entity data available</h2>
+				<pre data-orbit-file-receiver-entity-data style="flex: 1 1 0%" />
+			</div>
+		</form>
+	</body>
+</html>

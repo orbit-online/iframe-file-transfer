@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>iFrame file transfer</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="stylesheet" type="text/css" href="./sender.css" />
+		<script type="module" src="./sender.js"></script>
+	</head>
+	<body>
+		<div>
+			<a class="back-link" href="/"><span>← </span><span class="link-text">Examples</span></a>
+		</div>
+		<div data-orbit-file-sender-container id="root">
+			<form>
+				<label>
+					<span>ORBITFILE:ID</span>
+					<input data-orbit-file-sender-orbit-file-id name="orbit-file-id" value="ORBITFILE:42" />
+				</label>
+				<label>
+					<span>File</span>
+					<input data-orbit-file-sender-input name="file" type="file" />
+				</label>
+				<label>
+					<span>Chunk size</span>
+					<input
+						step="100"
+						type="range"
+						data-orbit-file-transfer-chunk-size
+						min="500"
+						max="1048576"
+						value="524288" />
+				</label>
+				<label>
+					<span>Throttle</span>
+					<input step="10" type="range" data-orbit-file-transfer-throttle min="0" max="1000" value="0" />
+				</label>
+				<label>
+					<span>Entity data</span>
+					<textarea data-orbit-file-sender-entity-data name="entity-data">
+{
+    "currentLocale": "en_GB",
+    "entityType": "reference",
+    "externalId": "83911293",
+    "masterId": 21421,
+    "masterLocale": "da_DK",
+    "projectEnd": "2023-09-30",
+    "projectName": "Project/Reference with beautiful pictures",
+    "projectStart": "2023-03-01",
+    "variationId": 43132
+}</textarea
+					>
+				</label>
+			</form>
+		</div>
+	</body>
+</html>

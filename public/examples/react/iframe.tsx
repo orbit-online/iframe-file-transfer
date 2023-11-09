@@ -1,4 +1,4 @@
-import { useOrbitIframeFileTransferReceiver } from './receiver.js';
+import { useOrbitIframeFileTransferReceiver } from '../../../src/react/receiver.js';
 interface AppProps {}
 
 const errorContainerStyles: React.CSSProperties = {
@@ -27,7 +27,7 @@ async function onOrbitFileReceiverFormSubmit(
 	url: string,
 	method: string,
 	formData: FormData,
-	orbitEntityData: Record<string, string | number | boolean | null | undefined>,
+	_orbitEntityData: Record<string, string | number | boolean | null | undefined>,
 ) {
 	const request = new Request(url, {
 		method,
@@ -38,7 +38,7 @@ async function onOrbitFileReceiverFormSubmit(
 	return response.json();
 }
 
-const App = (props: AppProps) => {
+const App = (_props: AppProps) => {
 	const [error, setError] = React.useState<Maybe<Error>>(null);
 	const { formRef, fileIdInputRef, fileInputRef, imageRef, onCancel, orbitEntityData, progressRef } =
 		useOrbitIframeFileTransferReceiver(setError, onOrbitFileReceiverFormSubmit);

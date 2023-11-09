@@ -4,10 +4,10 @@ import {
 	SubmitHandler,
 	querySelectorOne,
 	tryGetOriginFromUrlHash,
-} from '../receiver.js';
-import { createLogger } from '../util.js';
+} from '../lib/receiver.js';
+import { createLogger } from '../lib/util.js';
 
-const tryGetErrorContainerElement = (): HTMLElement => {
+function tryGetErrorContainerElement(): HTMLElement {
 	const errorContainer = querySelectorOne<HTMLElement>(
 		'[data-orbit-file-receiver-error-container]',
 		`Couldn't find any error container element, there must exist an element in the DOM with the data-orbit-file-receiver-error-container attribute present.
@@ -17,10 +17,10 @@ E.g. <div className="..." data-orbit-file-receiver-error-container></div>`,
 	errorContainer.style.whiteSpace = 'pre-wrap';
 
 	return errorContainer;
-};
+}
 
-const tryGetFormElement = (): HTMLFormElement =>
-	querySelectorOne<HTMLFormElement>(
+function tryGetFormElement(): HTMLFormElement {
+	return querySelectorOne<HTMLFormElement>(
 		'form[data-orbit-file-receiver]',
 		`<form /> element wasn't found, there must exist a <form /> element in the DOM with the data-orbit-file-receiver assigned to the name of a submit handler function present in global scope.
 e.g.:
@@ -45,9 +45,10 @@ method="post"
 </html>
 `,
 	);
+}
 
-const tryGetFileIdInputElement = (): HTMLInputElement =>
-	querySelectorOne<HTMLInputElement>(
+function tryGetFileIdInputElement(): HTMLInputElement {
+	return querySelectorOne<HTMLInputElement>(
 		'input[type=hidden][name][data-orbit-file-receiver-file-id]',
 		`File id input element <input type="hidden" /> wasn't found, there must exist an input element of type "hidden" present in the DOM with the orbit-file-receiver-file-id attribute assigned.
 e.g
@@ -55,9 +56,10 @@ e.g
 	<input type="hidden" name="..." data-orbit-file-receiver-file-id />
 </form>`,
 	);
+}
 
-const tryGetFileInputElement = (): HTMLInputElement =>
-	querySelectorOne<HTMLInputElement>(
+function tryGetFileInputElement(): HTMLInputElement {
+	return querySelectorOne<HTMLInputElement>(
 		'input[type=file][data-orbit-file-receiver-input]',
 		`File input element <input type="file" /> wasn't found, there must exist an input element of type "file" present in the DOM with the orbit-file-receiver-input attribute assigned.
 e.g
@@ -65,8 +67,9 @@ e.g
 <input type="file" name="file" data-orbit-file-receiver-input />
 </form>`,
 	);
+}
 
-const tryGetSubmitHandler = (form: HTMLFormElement): SubmitHandler => {
+function tryGetSubmitHandler(form: HTMLFormElement): SubmitHandler {
 	const submitHandlerName = form.dataset.orbitFileReceiver?.trim() ?? '';
 	if (submitHandlerName.length === 0) {
 		throw new OrbitIframeFileTransferReceiverError(
@@ -103,7 +106,7 @@ Please check if the function name is spelled correctly.`,
 		);
 	}
 	return submitHandler;
-};
+}
 
 window.addEventListener(
 	'DOMContentLoaded',
@@ -111,16 +114,23 @@ window.addEventListener(
 		const logger = createLogger('orbit:iframe_file_receiver');
 		logger.info('DOMContentLoaded');
 
+		// eslint-disable-next-line no-undef-init
 		let errorContainer: HTMLElement | undefined = undefined;
 		const errorHandler = (err: unknown) => {
 			if (err instanceof Error) {
-				errorContainer == null
-					? alert(err.message)
-					: ((errorContainer.textContent = err.message), (errorContainer.style.display = 'initial'));
+				if (errorContainer == null) {
+					alert(err.message);
+				} else {
+					errorContainer.textContent = err.message;
+					errorContainer.style.display = 'initial';
+				}
 			} else {
-				errorContainer == null
-					? alert(JSON.stringify(err))
-					: ((errorContainer.textContent = JSON.stringify(err)), (errorContainer.style.display = 'initial'));
+				if (errorContainer == null) {
+					alert(JSON.stringify(err));
+				} else {
+					errorContainer.textContent = JSON.stringify(err);
+					errorContainer.style.display = 'initial';
+				}
 			}
 		};
 
@@ -144,19 +154,27 @@ window.addEventListener(
 			const image = document.querySelector<HTMLImageElement>('img[data-orbit-file-receiver-image]');
 			const progress = document.querySelector<HTMLProgressElement>('progress[data-orbit-file-receiver-progress]');
 
-			cancel == null
-				? logger.debug('<input type=button /> Cancel button element not found, skipping...')
-				: logger.debug('<input type=button /> Cancel button element found.');
-			image == null
-				? logger.debug('<img /> Image preview element not found, skipping...')
-				: logger.debug('<img /> Image preview element found.');
-			progress == null
-				? logger.debug('<progress /> File transfer progress indicator element not found, skipping...')
-				: logger.debug('<progress /> File transfer progress indicator element found.');
+			if (cancel == null) {
+				logger.debug('<input type=button /> Cancel button element not found, skipping...');
+			} else {
+				logger.debug('<input type=button /> Cancel button element found.');
+			}
+			if (image == null) {
+				logger.debug('<img /> Image preview element not found, skipping...');
+			} else {
+				logger.debug('<img /> Image preview element found.');
+			}
+			if (progress == null) {
+				logger.debug('<progress /> File transfer progress indicator element not found, skipping...');
+			} else {
+				logger.debug('<progress /> File transfer progress indicator element found.');
+			}
 
-			entityDataContainer == null
-				? logger.debug('<pre /> Entity data container not found, skipping...')
-				: logger.debug('<pre /> Entity data container found.');
+			if (entityDataContainer == null) {
+				logger.debug('<pre /> Entity data container not found, skipping...');
+			} else {
+				logger.debug('<pre /> Entity data container found.');
+			}
 
 			fileIdInput.disabled = true;
 			fileInput.setAttribute('type', 'text');

@@ -1,7 +1,7 @@
-import { querySelectorOne } from '../util.js';
-import { createIframeHandler, createIframeUrl } from '../sender.js';
+import { querySelectorOne } from '../../../src/lib/util.js';
+import { createIframeHandler, createIframeUrl } from '../../../src/react/sender.js';
 
-const IFRAME_URL = 'http://localhost:3001/react/iframe.html';
+const IFRAME_URL = 'http://localhost:3001/examples/react/iframe.html';
 
 interface State {
 	readonly chunkSize: number;
@@ -11,12 +11,14 @@ interface State {
 	readonly throttle: number;
 }
 
+/* eslint-disable @typescript-eslint/tslint/config */
 type Action =
 	| { readonly type: 'SET_CHUNK_SIZE'; readonly payload: { readonly chunkSize: number } }
 	| { readonly type: 'SET_ENTITY_DATA'; readonly payload: { readonly entityData: string } }
 	| { readonly type: 'SET_FILE'; readonly payload: { readonly file: Maybe<File> } }
 	| { readonly type: 'SET_ORBIT_FILE_ID'; readonly payload: { readonly orbitFileId: string } }
 	| { readonly type: 'SET_THROTTLE'; readonly payload: { readonly throttle: number } };
+/* eslint-enable @typescript-eslint/tslint/config */
 
 const reducer: React.Reducer<State, Action> = (prevState: State, action): State => {
 	const { type, payload } = action;

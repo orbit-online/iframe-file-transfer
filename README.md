@@ -12,7 +12,7 @@ Though it is not possible to make the re-assembled file appear to the BrowserCon
 
 3rd party integrators to Orbit that facilitate uploading files to external systems for processing and centralized asset management won't have to implement the sender part of the protocol, as it is facilitated by Orbit.
 
-A sender is responsible for listening for file input element change events and spawn an iframe that implements the receiver end of the file transfer protocol. Once the iframe is loaded, the sender establish a connection with it via `MessageChannel` and starts transferring the file to the receiver along with some metadata. 
+A sender is responsible for listening for file input element change events and spawn an iframe that implements the receiver end of the file transfer protocol. Once the iframe is loaded, the sender establish a connection with it via `MessageChannel` and starts transferring the file to the receiver along with some metadata.
 
 Example "mock" implementations can be found here and are useful for testing the receiver end of the protocol.
 
@@ -25,4 +25,3 @@ As an implementor of a receiver you are responsible for providing a form submit 
 Files are transfered to the receiver along with an unique id, that is important in order to be able to update the file in Orbit afterwards via the Orbit Import Framework.
 
 You can find example of receiver implementations in React or in vanilla JS with a declarative HTML `data-*` attribute API.
-
