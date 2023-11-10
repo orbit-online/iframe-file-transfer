@@ -132,6 +132,10 @@ export class OrbitIframeFileTransferReceiver {
 		this.onFileChunkReceived = initObject.onFileChunkReceived;
 		this.onError = (err: Error) => {
 			this.logger.error(err instanceof Error ? err.message : String(err));
+			this.state?.outgoingPort.postMessage({
+				event: 'error',
+				error: err instanceof Error ? err.message : String(err),
+			});
 			initObject.onError(err);
 		};
 		this.onFileTransferInit = initObject.onFileTransferInit;

@@ -21,21 +21,25 @@ const errorContainerStyles: React.CSSProperties = {
  * @param {string} url
  * @param {string} method
  * @param {FormData} formData
- * @param {Record<string, any>} orbitEntityData
+ * @param {Record<string, any>} _orbitEntityData
  */
 async function onOrbitFileReceiverFormSubmit(
 	url: string,
 	method: string,
 	formData: FormData,
-	_orbitEntityData: Record<string, string | number | boolean | null | undefined>,
-) {
+	_orbitEntityData: Record<string, any>,
+): Promise<void> {
 	const request = new Request(url, {
-		method,
 		body: formData,
+		method: method,
 	});
 
 	const response = await fetch(request);
-	return response.json();
+	if (!response.ok) {
+		throw new Error(
+			'Upload was unsuccesful, please contact external system administrator at support@external.system with details on how to reproduce this error.',
+		);
+	}
 }
 
 const App = (_props: AppProps) => {

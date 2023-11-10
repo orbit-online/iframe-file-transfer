@@ -7,6 +7,7 @@ interface State {
 	readonly chunkSize: number;
 	readonly entityData: string;
 	readonly file: Maybe<File>;
+	readonly iframeUrl: string;
 	readonly orbitFileId: string;
 	readonly throttle: number;
 }
@@ -16,6 +17,7 @@ type Action =
 	| { readonly type: 'SET_CHUNK_SIZE'; readonly payload: { readonly chunkSize: number } }
 	| { readonly type: 'SET_ENTITY_DATA'; readonly payload: { readonly entityData: string } }
 	| { readonly type: 'SET_FILE'; readonly payload: { readonly file: Maybe<File> } }
+	| { readonly type: 'SET_IFRAME_URL'; readonly payload: { readonly iframeUrl: string } }
 	| { readonly type: 'SET_ORBIT_FILE_ID'; readonly payload: { readonly orbitFileId: string } }
 	| { readonly type: 'SET_THROTTLE'; readonly payload: { readonly throttle: number } };
 /* eslint-enable @typescript-eslint/tslint/config */
@@ -37,6 +39,11 @@ const reducer: React.Reducer<State, Action> = (prevState: State, action): State 
 			return {
 				...prevState,
 				file: payload.file,
+			};
+		case 'SET_IFRAME_URL':
+			return {
+				...prevState,
+				iframeUrl: payload.iframeUrl,
 			};
 		case 'SET_ORBIT_FILE_ID':
 			return {
@@ -64,16 +71,14 @@ const initialState: State = {
     "variationId": 43132
 }`,
 	file: null,
+	iframeUrl: IFRAME_URL,
 	orbitFileId: 'ORBITFILE:42',
 	throttle: 0,
 };
 
-interface AppProps {
-	readonly iframeUrl: string;
-}
+interface AppProps {}
 
-const App = (props: AppProps) => {
-	const { iframeUrl: iframeUrlProps } = props;
+const App = (_props: AppProps) => {
 	const [state, dispatch] = React.useReducer(reducer, initialState);
 
 	const onChange = React.useCallback((e: React.ChangeEvent<HTMLElement>) => {
@@ -86,7 +91,12 @@ const App = (props: AppProps) => {
 				case 'file':
 					return dispatch({
 						type: 'SET_FILE',
-						payload: { file: (target as HTMLInputElement).files?.item(0) ?? null },
+						payload: { file: target.files?.item(0) ?? null },
+					});
+				case 'iframe-url':
+					return dispatch({
+						type: 'SET_IFRAME_URL',
+						payload: { iframeUrl: target.value },
 					});
 				case 'chunk-size':
 					return dispatch({ type: 'SET_CHUNK_SIZE', payload: { chunkSize: target.valueAsNumber } });
@@ -105,29 +115,42 @@ const App = (props: AppProps) => {
 
 	const iframeHandler = React.useMemo(
 		() =>
-			createIframeHandler(
-				state.file,
-				state.orbitFileId,
-				state.entityData,
-				() => {
-					alert('File upload completed.');
-					dispatch({ type: 'SET_FILE', payload: { file: null } });
-				},
-				() => {
+			createIframeHandler({
+				chunkSize: state.chunkSize,
+				entityData: state.entityData,
+				file: state.file,
+				onCancel: () => {
 					alert('File upload cancelled.');
 					dispatch({ type: 'SET_FILE', payload: { file: null } });
 				},
-				state.chunkSize,
-				state.throttle,
-			) ?? undefined,
-		[state],
+				onComplete: () => {
+					alert('File upload completed.');
+					dispatch({ type: 'SET_FILE', payload: { file: null } });
+				},
+				onError: (err) => alert(err instanceof Error ? err.message : JSON.stringify(err)),
+				orbitFileId: state.orbitFileId,
+				throttle: state.throttle,
+			}) ?? undefined,
+		[state.chunkSize, state.entityData, state.file, state.orbitFileId, state.throttle],
 	);
-	const iframeUrl = React.useMemo(() => createIframeUrl(iframeUrlProps), [iframeUrlProps]);
-	const iframe = state.file == null ? null : <iframe key={state.file.name} src={iframeUrl} onLoad={iframeHandler} />;
+
+	const iframe = React.useMemo(
+		() =>
+			state.file == null ? (
+				<div id="iframe-placeholder">iframe</div>
+			) : (
+				<iframe key={state.file.name} src={createIframeUrl(state.iframeUrl)} onLoad={iframeHandler} />
+			),
+		[state.file],
+	);
 
 	return (
 		<React.Fragment>
 			<form>
+				<label>
+					<span>Iframe URL</span>
+					<input name="iframe-url" onChange={onChange} value={state.iframeUrl} />
+				</label>
 				<label>
 					<span>ORBITFILE:ID</span>
 					<input name="orbit-file-id" onChange={onChange} value={state.orbitFileId} />
@@ -172,5 +195,5 @@ const App = (props: AppProps) => {
 
 document.addEventListener('DOMContentLoaded', () => {
 	const root = querySelectorOne<HTMLDivElement>('#root', Error);
-	ReactDOM.render(<App iframeUrl={IFRAME_URL} />, root);
+	ReactDOM.render(<App />, root);
 });

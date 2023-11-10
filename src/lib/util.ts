@@ -121,3 +121,49 @@ export function rejectAfter(
 ): Promise<never> {
 	return new Promise<never>((_, reject) => setTimeout(() => reject(new ErrorConstructor(rejectionMessage)), millis));
 }
+
+export function createDeferred<T = void>() {
+	const state = {
+		resolve: null as unknown as (value: T) => void,
+		reject: null as unknown as (err: Error) => void,
+		isRejected: false,
+		isResolved: false,
+		get isSettled(): boolean {
+			return this.isResolved || this.isRejected;
+		},
+	};
+
+	const promise = new Promise<T>((resolve, reject) => {
+		state.resolve = (...args) => {
+			if (!state.isSettled) {
+				state.isResolved = true;
+				resolve(...args);
+			}
+		};
+		state.reject = (...args) => {
+			if (!state.isSettled) {
+				state.isRejected = true;
+				reject(...args);
+			}
+		};
+	});
+
+	return {
+		get isRejected(): boolean {
+			return state.isRejected;
+		},
+		get isResolved(): boolean {
+			return state.isResolved;
+		},
+		get isSettled(): boolean {
+			return state.isSettled;
+		},
+		promise,
+		get reject() {
+			return state.reject;
+		},
+		get resolve() {
+			return state.resolve;
+		},
+	};
+}

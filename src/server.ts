@@ -21,15 +21,25 @@ const logger = {
 	warn: (msg?: any, ...optionalParams: any[]): void => console.warn(`[server] ${msg}`, ...optionalParams),
 } as const;
 
+const cwd = process.cwd();
+
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOSTNAME = 'localhost';
 const DEFAULT_PROTOCOL = 'http';
-const DEFAULT_PUBLIC_PATH = path.join(__dirname, 'public');
+
+const DEFAULT_DIST_PATH = path.join(cwd, 'dist');
+const DIST_PATH = path.resolve((process.env.DIST_PATH ?? DEFAULT_DIST_PATH).trim());
+
+const DEFAULT_PUBLIC_PATH = path.join(DIST_PATH, 'public');
+const PUBLIC_PATH = path.resolve((process.env.PUBLIC_PATH ?? DEFAULT_PUBLIC_PATH).trim());
+const DEFAULT_SOURCE_PATH = path.join(cwd, 'src');
+const SOURCE_PATH = path.resolve((process.env.SOURCE_PATH ?? DEFAULT_SOURCE_PATH).trim());
+const DEFAULT_EXAMPLES_SOURCE_PATH = path.join(cwd, 'public', 'examples');
+const EXAMPLES_SOURCE_PATH = path.resolve((process.env.EXAMPLES_SOURCE_PATH ?? DEFAULT_EXAMPLES_SOURCE_PATH).trim());
 
 const PORT = ((port) => (Number.isNaN(port) ? DEFAULT_PORT : port))(Number(process.env.PORT?.trim() ?? DEFAULT_PORT));
 const HOSTNAME = (process.env.HOSTNAME ?? DEFAULT_HOSTNAME).trim();
 const PROTOCOL = (process.env.PROTOCOL ?? DEFAULT_PROTOCOL).trim();
-const PUBLIC_PATH = path.resolve((process.env.PUBLIC_PATH ?? DEFAULT_PUBLIC_PATH).trim());
 
 const baseUrl = `${PROTOCOL}://${HOSTNAME}:${PORT}`;
 
@@ -42,16 +52,21 @@ const handler: RequestListener<typeof IncomingMessage, typeof ServerResponse> = 
 
 	const method = req.method ?? 'GET';
 
+	const url = new URL(req.url, `http://${req.headers.host}`);
 	switch (method) {
 		case 'GET': {
 			try {
-				const url = new URL(req.url, baseUrl);
-				logger.info(url.pathname);
-				const filePath = url.pathname.startsWith('/src/public/')
-					? path.join(__dirname, '..', url.pathname)
+				const isSourceFile = url.pathname.endsWith('.ts') || url.pathname.endsWith('.tsx');
+				const isExample = url.pathname.startsWith('/examples/');
+				const filePath = isSourceFile
+					? isExample
+						? path.join(EXAMPLES_SOURCE_PATH, '..', url.pathname)
+						: path.join(SOURCE_PATH, '..', url.pathname)
 					: url.pathname.startsWith('/src/')
-					? path.join(PUBLIC_PATH, '..', url.pathname)
+					? path.join(DIST_PATH, url.pathname)
 					: path.join(PUBLIC_PATH, url.pathname === '/' ? 'index.html' : url.pathname);
+
+				logger.debug(`${url.pathname} -> ${filePath}`);
 				const fileStat = await fs.stat(filePath);
 				if (fileStat.isFile()) {
 					res.setHeader('access-control-allow-origin', '*');
@@ -70,6 +85,13 @@ const handler: RequestListener<typeof IncomingMessage, typeof ServerResponse> = 
 			return;
 		}
 		case 'POST': {
+			if (url.pathname !== '/upload') {
+				res.setHeader('content-type', 'application/json');
+				res.writeHead(404);
+				res.write(JSON.stringify({ error: 'Not found.' }));
+				res.end();
+				return;
+			}
 			res.setHeader('content-type', 'application/json');
 			res.writeHead(200);
 			res.write(JSON.stringify({ id: 'dam-file-id-123' }));
