@@ -13,6 +13,14 @@ function tryGetErrorContainerElement(): HTMLElement {
 		`Couldn't find any error container element, there must exist an element in the DOM with the data-orbit-file-receiver-error-container attribute present.
 E.g. <div className="..." data-orbit-file-receiver-error-container></div>`,
 	);
+	const dataDisplay = errorContainer.getAttribute('data-display');
+	if (dataDisplay == null || dataDisplay === '') {
+		errorContainer.setAttribute(
+			'data-display',
+			window.getComputedStyle(errorContainer).getPropertyValue('display'),
+		);
+	}
+
 	errorContainer.style.display = 'none';
 	errorContainer.style.whiteSpace = 'pre-wrap';
 
@@ -121,15 +129,19 @@ window.addEventListener(
 				if (errorContainer == null) {
 					alert(err.message);
 				} else {
+					const dataDisplay = errorContainer.getAttribute('data-display');
 					errorContainer.textContent = err.message;
-					errorContainer.style.display = 'initial';
+					errorContainer.style.display =
+						dataDisplay == null || dataDisplay === '' || dataDisplay === 'none' ? 'initial' : dataDisplay;
 				}
 			} else {
 				if (errorContainer == null) {
 					alert(JSON.stringify(err));
 				} else {
+					const dataDisplay = errorContainer.getAttribute('data-display');
 					errorContainer.textContent = JSON.stringify(err);
-					errorContainer.style.display = 'initial';
+					errorContainer.style.display =
+						dataDisplay == null || dataDisplay === '' || dataDisplay === 'none' ? 'initial' : dataDisplay;
 				}
 			}
 		};

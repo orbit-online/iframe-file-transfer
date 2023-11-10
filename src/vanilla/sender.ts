@@ -8,26 +8,26 @@ class OrbitIframeFileSenderError extends OrbitIframeFileTransferError {
 	}
 }
 
-export const initializeSender = (iframeUrl?: string) => {
+export const createSenderListener = (iframeUrl?: string) => {
 	return () => {
 		const logger = createLogger('orbit:iframe_file_sender');
 		logger.info('DOMContentLoaded');
 
 		const iframeUrlInput = document.querySelector<HTMLInputElement>('input[data-orbit-file-sender-iframe-url]');
 		if (iframeUrl == null && iframeUrlInput == null) {
-			throw new OrbitIframeFileSenderError(`No iframe URL provided. It can be provided either via the an <input /> element with the [data-orbit-file-sender-iframe-url] attribute or as argument to the initializeSender() function.
+			throw new OrbitIframeFileSenderError(`No iframe URL provided. It can be provided either via the an <input /> element with the [data-orbit-file-sender-iframe-url] attribute or as argument to the createSenderListener() function.
 e.g.:
 
 <input type="text" data-orbit-file-sender-iframe-url />
 
 or e.g.:
-window.addEventListener('DOMContentLoaded', initializeSender(IFRAME_URL), { passive: true });
+window.addEventListener('DOMContentLoaded', createSenderListener(IFRAME_URL), { passive: true });
 `);
 		}
 
 		if (iframeUrl != null && iframeUrlInput != null) {
 			throw new OrbitIframeFileSenderError(
-				"Iframe URL cannot be provided both by initializeSender('http://...') and <input data-orbit-file-sender-iframe-url />, you'll have to pick one.",
+				"Iframe URL cannot be provided both by createSenderListener('http://...') and <input data-orbit-file-sender-iframe-url />, you'll have to pick one.",
 			);
 		}
 

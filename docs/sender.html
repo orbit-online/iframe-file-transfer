@@ -4,8 +4,7 @@
 		<title>iFrame file transfer</title>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<!-- <link rel="stylesheet" type="text/css" href="./sender.css" /> -->
+		<link rel="icon" type="image/x-icon" href="https://orbit.online/favicon.png" />
 		<style>
 			[type='text']:focus,
 			[type='email']:focus,
@@ -31,7 +30,31 @@
 			}
 		</style>
 		<script src="https://cdn.tailwindcss.com"></script>
-		<script type="module" src="./sender.js"></script>
+		<script type="module">
+			const sender = import('https://unpkg.com/@orbit-online/iframe-file-transfer@%5E1.0.0/vanilla/sender.js');
+			window.addEventListener(
+				'DOMContentLoaded',
+				() => {
+					sender.then((module) => module.createSenderListener()).then((listen) => listen());
+
+					const iframeUrl = document.querySelector('[data-orbit-file-sender-iframe-url]');
+					if (iframeUrl == null) {
+						return;
+					}
+
+					const storedIframeUrl = window.localStorage.getItem('orbit-file-sender-iframe-url');
+					if (storedIframeUrl != null && storedIframeUrl !== '') {
+						iframeUrl.value = storedIframeUrl;
+					}
+
+					iframeUrl.addEventListener('input', (e) => {
+						const newStoredIframeUrl = e.target.value;
+						window.localStorage.setItem('orbit-file-sender-iframe-url', newStoredIframeUrl);
+					});
+				},
+				{ passive: true },
+			);
+		</script>
 	</head>
 	<body class="bg-gray-50 h-full flex flex-col">
 		<div class="flex-0">

@@ -1,3 +1,3 @@
-import { initializeSender } from '../../../src/vanilla/sender.js';
+import { createSenderListener } from '../../../src/vanilla/sender.js';
 
-window.addEventListener('DOMContentLoaded', initializeSender(), { passive: true });
+window.addEventListener('DOMContentLoaded', createSenderListener(), { passive: true });

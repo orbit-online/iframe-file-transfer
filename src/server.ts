@@ -70,6 +70,7 @@ const handler: RequestListener<typeof IncomingMessage, typeof ServerResponse> = 
 				const fileStat = await fs.stat(filePath);
 				if (fileStat.isFile()) {
 					res.setHeader('access-control-allow-origin', '*');
+					res.setHeader('access-control-allow-methods', 'GET, POST');
 					res.setHeader('content-type', mime.getType(path.extname(filePath)) ?? 'application/octet-stream');
 					createReadStream(filePath).pipe(res);
 					return;
@@ -98,6 +99,14 @@ const handler: RequestListener<typeof IncomingMessage, typeof ServerResponse> = 
 			res.end();
 			return;
 		}
+		case 'OPTIONS': // CORS
+			res.setHeader('access-control-allow-origin', '*');
+			res.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS');
+			res.setHeader('access-control-allow-headers', 'Content-Type');
+			res.setHeader('vary', 'Accept-Encoding, Origin');
+			res.writeHead(200);
+			res.end();
+			return;
 		default: {
 			res.writeHead(405);
 			res.end();
