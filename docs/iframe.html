@@ -60,10 +60,16 @@
 					method: method,
 				});
 
-				const response = await fetch(request);
-				if (!response.ok) {
+				try {
+					const response = await fetch(request);
+					if (!response.ok) {
+						throw new Error(
+							`Upload to: ${request.url} was unsuccesful, please contact external system administrator at support@external.system with details on how to reproduce this error.`,
+						);
+					}
+				} catch (err) {
 					throw new Error(
-						'Upload was unsuccesful, please contact external system administrator at support@external.system with details on how to reproduce this error.',
+						`Network error: Upload to ${request.url} was unsuccesful, please contact external system administrator at support@external.system with details on how to reproduce this error.`,
 					);
 				}
 			}
