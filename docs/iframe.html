@@ -1,0 +1,217 @@
+<!doctype html>
+<html class="h-full" lang="en">
+	<head>
+		<title>iframe</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<!-- <link rel="stylesheet" type="text/css" href="./iframe.css" /> -->
+		<style>
+			[type='text']:focus,
+			[type='email']:focus,
+			[type='url']:focus,
+			[type='password']:focus,
+			[type='number']:focus,
+			[type='date']:focus,
+			[type='datetime-local']:focus,
+			[type='month']:focus,
+			[type='search']:focus,
+			[type='tel']:focus,
+			[type='time']:focus,
+			[type='week']:focus,
+			[multiple]:focus,
+			textarea:focus,
+			select:focus {
+				outline: 2px solid transparent;
+			}
+
+			[data-orbit-file-receiver-error-container] {
+				background-color: #fff5f5;
+				border: none;
+				border-left-color: #fc8181;
+				border-left-style: solid;
+				border-left-width: 4px;
+				color: #c53030;
+				display: none;
+				grid-column: 1 / 3;
+				padding: 1rem;
+			}
+		</style>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script
+			src="https://unpkg.com/@orbit-online/iframe-file-transfer@%5E1.1.0/vanilla/receiver.js"
+			type="module"></script>
+		<script type="module">
+			/**
+			 * If simple value "data-binding" in the form isn't sufficient
+			 * you can yield to set values imperativly through the [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) Web API
+			 * and the `orbitEntityData` object.
+			 *
+			 * @param {string} url
+			 * @param {string} method
+			 * @param {FormData} formData
+			 * @param {Record<string, any>} orbitEntityData
+			 *
+			 * @return {Promise<void>}
+			 */
+			async function onOrbitFileReceiverFormSubmit(url, method, formData, orbitEntityData) {
+				const request = new Request(url, {
+					body: formData,
+					method: method,
+				});
+
+				const response = await fetch(request);
+				if (!response.ok) {
+					throw new Error(
+						'Upload was unsuccesful, please contact external system administrator at support@external.system with details on how to reproduce this error.',
+					);
+				}
+			}
+			globalThis.onOrbitFileReceiverFormSubmit = onOrbitFileReceiverFormSubmit;
+		</script>
+	</head>
+	<body class="h-full flex flex-col">
+		<form
+			data-orbit-file-receiver="onOrbitFileReceiverFormSubmit"
+			action="/upload"
+			enctype="multipart/form-data"
+			method="post">
+			<div data-orbit-file-receiver-error-container data-display="inline-block"></div>
+			<input type="hidden" name="orbitFileId" data-orbit-file-receiver-file-id required />
+			<div class="px-4 py-6 sm:p-8">
+				<div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+					<div class="col-span-full">
+						<label for="projectName" class="block text-sm font-medium leading-6 text-gray-900"
+							>Project name</label
+						>
+						<div class="mt-2">
+							<div
+								class="flex bg-gray-100 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block pointer-events-none flex-1 border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									data-orbit-file-receiver-entity-data-value="projectName"
+									id="projectName"
+									name="projectName"
+									readonly
+									type="text" />
+							</div>
+						</div>
+					</div>
+					<div class="col-span-4">
+						<label for="projectNumber" class="block text-sm font-medium leading-6 text-gray-900"
+							>Project number</label
+						>
+						<div class="mt-2">
+							<div
+								class="flex bg-gray-100 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block pointer-events-none flex-1 border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									data-orbit-file-receiver-entity-data-value="externalId"
+									id="projectNumber"
+									name="projectNumber"
+									readonly
+									type="text" />
+							</div>
+						</div>
+					</div>
+					<div class="col-span-3">
+						<label for="projectStart" class="block text-sm font-medium leading-6 text-gray-900"
+							>Project start</label
+						>
+						<div class="mt-2">
+							<div
+								class="flex bg-gray-100 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block pointer-events-none flex-1 border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									data-orbit-file-receiver-entity-data-value="projectStart"
+									id="projectStart"
+									name="projectStart"
+									readonly
+									type="date" />
+							</div>
+						</div>
+					</div>
+
+					<div class="col-span-3">
+						<label for="projectEnd" class="block text-sm font-medium leading-6 text-gray-900"
+							>Project end</label
+						>
+						<div class="mt-2">
+							<div
+								class="flex bg-gray-100 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block pointer-events-none flex-1 border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									data-orbit-file-receiver-entity-data-value="projectEnd"
+									id="projectEnd"
+									name="projectEnd"
+									readonly
+									type="date" />
+							</div>
+						</div>
+					</div>
+
+					<div class="col-span-3">
+						<label for="pictureTakenAt" class="block text-sm font-medium leading-6 text-gray-900"
+							>Picture taken at</label
+						>
+						<div class="mt-2">
+							<div
+								class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block flex-1 border-0 bg-transparent py-1.5 pl-2 pr-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									id="pictureTakenAt"
+									name="pictureTakenAt"
+									required
+									type="date" />
+							</div>
+						</div>
+					</div>
+					<div class="col-span-3">
+						<label for="file" class="block text-sm font-medium leading-6 text-gray-900">File</label>
+						<div class="mt-2">
+							<div
+								class="flex bg-gray-100 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block pointer-events-none flex-1 border-0 bg-transparent py-1.5 pl-2 pr-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									id="file"
+									name="file"
+									type="file"
+									required
+									data-orbit-file-receiver-input />
+							</div>
+						</div>
+					</div>
+
+					<div class="col-span-full flex flex-col gap-4">
+						<progress
+							class="w-full h-2 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-300 [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-md [&::-webkit-progress-bar]:bg-slate-300 [&::-webkit-progress-value]:bg-indigo-600 [&::-moz-progress-bar]:bg-indigo-600"
+							data-orbit-file-receiver-progress
+							max="100"
+							value="0"></progress>
+						<img
+							class="h-64 self-center rounded-md ring-4 ring-offset-4 ring-indigo-200"
+							data-orbit-file-receiver-image
+							src="" />
+					</div>
+
+					<div class="col-span-full flex items-center justify-end gap-x-6">
+						<input
+							type="button"
+							class="text-sm font-semibold leading-6 text-gray-900"
+							data-orbit-file-receiver-cancel
+							value="Cancel" />
+						<input
+							type="submit"
+							class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+							value="Upload" />
+					</div>
+
+					<div class="col-span-full">
+						<h2 class="font-semibold">Orbit entity data available</h2>
+						<pre data-orbit-file-receiver-entity-data style="flex: 1 1 0%" />
+					</div>
+				</div>
+			</div>
+		</form>
+	</body>
+</html>

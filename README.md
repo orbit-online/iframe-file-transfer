@@ -16,6 +16,8 @@ A sender is responsible for listening for file input element change events and s
 
 Example "mock" implementations can be found here and are useful for testing the receiver end of the protocol.
 
+The [playground](https://orbit-online.github.io/iframe-file-transfer/playground.html) is an implementation for a sender that can be used to simulate a Orbit web client for testing a custom receiver implementation.
+
 ## Receiver
 
 Receivers are responsible for listening to file transfer events, and sending complete or cancel events back to the host, along with facilitating a place for error messages can appear to users in case anything should go wrong.
