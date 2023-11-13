@@ -15,7 +15,7 @@ export function createIframeUrl(url: string) {
 
 interface IframeHandlerOptions {
 	readonly chunkSize?: number;
-	readonly entityData: string;
+	readonly entityData: string | Record<string, any>;
 	readonly file: Maybe<File>;
 	readonly onCancel: () => void;
 	readonly onComplete: () => void;
@@ -26,7 +26,7 @@ interface IframeHandlerOptions {
 type IframeHandlerArgs = readonly [
 	file: Maybe<File>,
 	orbitFileId: string,
-	entityData: string,
+	entityData: string | Record<string, any>,
 	onComplete: () => void,
 	onCancel: () => void,
 	chunkSize?: number,
@@ -113,7 +113,7 @@ export function createIframeHandler(...p: HandlerParams): Maybe<IframeHandler> {
 				}
 			};
 
-			const parsedEntityData = JSON.parse(entityData);
+			const parsedEntityData = typeof entityData === 'string' ? JSON.parse(entityData) : entityData;
 			contentWindow.postMessage(
 				{
 					apiVersion: 1,
