@@ -39,7 +39,7 @@
 		</style>
 		<script src="https://cdn.tailwindcss.com"></script>
 		<script
-			src="https://unpkg.com/@orbit-online/iframe-file-transfer@%5E1.1.0/vanilla/receiver.js"
+			src="https://unpkg.com/@orbit-online/iframe-file-transfer@%5E1.3.0/vanilla/receiver.js"
 			type="module"></script>
 		<script type="module">
 			/**
@@ -86,6 +86,23 @@
 			<input type="hidden" name="orbitFileId" data-orbit-file-receiver-file-id required />
 			<div class="px-4 py-6 sm:p-8">
 				<div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+					<div class="col-span-full">
+						<label for="uploaderName" class="block text-sm font-medium leading-6 text-gray-900"
+							>Uploader</label
+						>
+						<div class="mt-2">
+							<div
+								class="flex bg-gray-100 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+								<input
+									class="block pointer-events-none flex-1 border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+									data-orbit-file-receiver-entity-data-value="user.name"
+									id="uploaderName"
+									name="uploaderName"
+									readonly
+									type="text" />
+							</div>
+						</div>
+					</div>
 					<div class="col-span-full">
 						<label for="projectName" class="block text-sm font-medium leading-6 text-gray-900"
 							>Project name</label

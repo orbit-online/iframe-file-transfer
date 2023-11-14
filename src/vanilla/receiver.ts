@@ -57,8 +57,8 @@ method="post"
 
 function tryGetFileIdInputElement(): HTMLInputElement {
 	return querySelectorOne<HTMLInputElement>(
-		'input[type=hidden][name][data-orbit-file-receiver-file-id]',
-		`File id input element <input type="hidden" /> wasn't found, there must exist an input element of type "hidden" present in the DOM with the orbit-file-receiver-file-id attribute assigned.
+		'input[name][data-orbit-file-receiver-file-id]',
+		`File id input element <input /> wasn't found, there must exist an input element of preferably of type "hidden" present in the DOM with the orbit-file-receiver-file-id attribute assigned.
 e.g
 <form ...>
 	<input type="hidden" name="..." data-orbit-file-receiver-file-id />
@@ -208,8 +208,26 @@ window.addEventListener(
 					document.querySelectorAll('input[data-orbit-file-receiver-entity-data-value]').forEach((elm) => {
 						if (elm instanceof HTMLInputElement) {
 							const key = elm.dataset.orbitFileReceiverEntityDataValue;
-							if (key != null && msg.entityData[key] != null) {
-								elm.value = msg.entityData[key];
+							if (key != null) {
+								const keyParts = key.split('.');
+								let value = msg.entityData;
+								do {
+									const keyPart = keyParts.shift();
+									if (keyPart == null) {
+										break;
+									}
+									value = value[keyPart];
+									if (value == null) {
+										break;
+									}
+								} while (keyParts.length > 0);
+								if (
+									typeof value === 'string' ||
+									typeof value === 'number' ||
+									typeof value === 'boolean'
+								) {
+									elm.value = String(value);
+								}
 							}
 						}
 					});

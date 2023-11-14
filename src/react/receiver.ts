@@ -1,51 +1,164 @@
 import {
 	OrbitIframeFileTransferReceiver,
 	OrbitIframeFileTransferReceiverError,
+	OrbitInitMessage,
 	SubmitHandler,
 	tryGetOriginFromUrlHash,
 } from '../lib/receiver.js';
 import { createLogger } from '../lib/util.js';
 
-export function useOrbitIframeFileTransferReceiver(
-	errorHandler: (err: Maybe<Error>) => void,
-	submitHandler: SubmitHandler,
-) {
-	const [orbitEntityData, setOrbitEntityData] = React.useState<Record<string, any>>({});
-	const logger = React.useMemo(() => createLogger('orbit:iframe_file_receiver'), []);
+interface InitialState {
+	readonly error: Maybe<Error>;
+	readonly file: null;
+	readonly imageSrc: null;
+	readonly initMessage: null;
+	readonly logger: ReturnType<typeof createLogger>;
+	readonly orbitFileId: null;
+	readonly progress: null;
+	readonly status: 'initial';
+}
 
+interface TransferingState {
+	readonly error: Maybe<Error>;
+	readonly file: null;
+	readonly imageSrc: null;
+	readonly initMessage: OrbitInitMessage;
+	readonly logger: ReturnType<typeof createLogger>;
+	readonly orbitFileId: string;
+	readonly progress: number;
+	readonly status: 'transfering';
+}
+
+interface CompleteState {
+	readonly error: Maybe<Error>;
+	readonly file: File;
+	readonly imageSrc: Maybe<string>;
+	readonly initMessage: OrbitInitMessage;
+	readonly logger: ReturnType<typeof createLogger>;
+	readonly orbitFileId: string;
+	readonly progress: number;
+	readonly status: 'complete';
+}
+
+interface ErrorState {
+	readonly error: Error;
+	readonly file: Maybe<File>;
+	readonly imageSrc: Maybe<string>;
+	readonly initMessage: Maybe<OrbitInitMessage>;
+	readonly logger: ReturnType<typeof createLogger>;
+	readonly orbitFileId: Maybe<string>;
+	readonly progress: Maybe<number>;
+	readonly status: 'error';
+}
+
+type State = InitialState | TransferingState | CompleteState | ErrorState;
+
+const initialState: Omit<InitialState, 'logger'> = {
+	error: null,
+	file: null,
+	imageSrc: null,
+	initMessage: null,
+	orbitFileId: null,
+	progress: null,
+	status: 'initial',
+};
+
+type Action =
+	| { readonly payload: { readonly msg: OrbitInitMessage }; readonly type: 'FILE_TRANSFER_INIT' }
+	| { readonly payload: { readonly progress: number }; readonly type: 'FILE_TRANSFER_CHUNK_RECEIVED' }
+	| { readonly payload: { readonly file: File }; readonly type: 'FILE_TRANSFER_COMPLETED' }
+	| { readonly payload: { readonly imageSrc: string }; readonly type: 'SET_IMAGE_SRC' }
+	| { readonly payload: { readonly error: Error }; readonly type: 'SET_ERROR' };
+
+function reducer(prevState: State, action: Action): State {
+	const { type } = action;
+	switch (type) {
+		case 'FILE_TRANSFER_INIT': {
+			return {
+				...prevState,
+				initMessage: action.payload.msg,
+				orbitFileId: action.payload.msg.orbitFileId,
+				progress: 0,
+				status: 'transfering',
+			} as TransferingState;
+		}
+		case 'FILE_TRANSFER_CHUNK_RECEIVED': {
+			return {
+				...prevState,
+				progress: action.payload.progress,
+				status: 'transfering',
+			} as TransferingState;
+		}
+		case 'FILE_TRANSFER_COMPLETED': {
+			return {
+				...prevState,
+				error: null,
+				file: action.payload.file,
+				status: 'complete',
+			} as CompleteState;
+		}
+		case 'SET_IMAGE_SRC': {
+			return {
+				...prevState,
+				imageSrc: action.payload.imageSrc,
+			} as State;
+		}
+		case 'SET_ERROR': {
+			return {
+				...prevState,
+				error: action.payload.error,
+				status: 'error',
+			};
+		}
+	}
+}
+
+export function useOrbitIframeFileTransferReceiver(submitHandler: SubmitHandler) {
+	const [state, dispatch] = React.useReducer(reducer, initialState, (initialState_) => ({
+		...initialState_,
+		logger: createLogger('orbit:iframe_file_receiver'),
+	}));
 	const formRef = React.useRef<HTMLFormElement>(null);
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
-	const fileIdInputRef = React.useRef<HTMLInputElement>(null);
-	const imageRef = React.useRef<HTMLImageElement>(null);
-	const progressRef = React.useRef<HTMLProgressElement>(null);
+
+	const setError = React.useCallback((err: Error) => dispatch({ type: 'SET_ERROR', payload: { error: err } }), []);
 
 	const receiver = React.useMemo(
 		() =>
 			new OrbitIframeFileTransferReceiver({
 				onFormSubmit: submitHandler,
-				onError: errorHandler,
+				onError: (err) => dispatch({ type: 'SET_ERROR', payload: { error: err } }),
 				onFileTransferInit: (msg) => {
-					if (fileIdInputRef.current != null) {
-						fileIdInputRef.current.value = msg.orbitFileId;
-					}
-					if (fileInputRef.current != null) {
-						fileInputRef.current.value = msg.fileName;
-					}
-					setOrbitEntityData(msg.entityData);
+					dispatch({
+						type: 'FILE_TRANSFER_INIT',
+						payload: {
+							msg,
+						},
+					});
 				},
 				onFileChunkReceived: (bytesReceived, totalBytes) => {
-					if (progressRef.current != null) {
-						progressRef.current.value = (bytesReceived / totalBytes) * 100;
-					}
+					dispatch({
+						type: 'FILE_TRANSFER_CHUNK_RECEIVED',
+						payload: { progress: (bytesReceived / totalBytes) * 100 },
+					});
 				},
 				onFileTransferCompleted: (file) => {
-					if (imageRef.current != null && file.type.startsWith('image/')) {
+					dispatch({ type: 'FILE_TRANSFER_COMPLETED', payload: { file } });
+					if (file.type.startsWith('image/')) {
 						const fileReader = new FileReader();
 						fileReader.onload = () => {
-							if (typeof fileReader.result === 'string') {
-								imageRef.current!.src = fileReader.result;
-								imageRef.current!.style.display = 'block';
+							if (fileReader.result != null) {
+								dispatch({
+									type: 'SET_IMAGE_SRC',
+									payload: { imageSrc: fileReader.result.toString() },
+								});
 							}
+						};
+						fileReader.onerror = () => {
+							dispatch({
+								type: 'SET_ERROR',
+								payload: { error: new Error("Couldn't load image into preview.") },
+							});
 						};
 						fileReader.readAsDataURL(file);
 					}
@@ -65,20 +178,6 @@ const iframeFileTrasnferReceiver = useOrbitIframeFileTransferReceiver(errorHandl
 return (
     <form ref={iframeFileTrasnferReceiver.formRef}>
         ...
-    </form>
-);`,
-				);
-			}
-
-			const fileIdInput = fileIdInputRef.current;
-			if (fileIdInput == null) {
-				throw new OrbitIframeFileTransferReceiverError(
-					`File id input element <input /> wasn't found, there must exist an input element present in the DOM assigned to the fileIdInputRef from the useOrbitIframeFileTransferReceiver hook.
-e.g.
-const iframeFileTrasnferReceiver = useOrbitIframeFileTransferReceiver(errorHandler, submitHandler);
-return (
-    <form ...>
-        <input type="hidden" name="..." ref={iframeFileTrasnferReceiver.fileIdInputRef} />
     </form>
 );`,
 				);
@@ -115,35 +214,46 @@ e.g.
 			const orbitOrigin = tryGetOriginFromUrlHash(window.location.hash);
 			form.setAttribute('data-orbit-origin', orbitOrigin);
 
-			if (imageRef.current == null) {
-				logger.debug('<img /> Image preview element not found, skipping...');
-			} else {
-				logger.debug('<img /> Image preview element found.');
-			}
-
-			if (progressRef.current == null) {
-				logger.debug('<progress /> File transfer progress indicator element not found, skipping...');
-			} else {
-				logger.debug('<progress /> File transfer progress indicator element found.');
-			}
-
-			form.onsubmit = receiver.createSubmitHandler(fileInput);
-			receiver.connect().catch(errorHandler);
+			receiver.connect().catch((err) =>
+				dispatch({
+					type: 'SET_ERROR',
+					payload: { error: err instanceof Error ? err : new Error(String(err)) },
+				}),
+			);
 		} catch (err) {
-			errorHandler(err as Error);
+			dispatch({ type: 'SET_ERROR', payload: { error: err instanceof Error ? err : new Error(String(err)) } });
 		}
 		return () => receiver.close();
 	}, []);
 
 	const onCancel = React.useCallback((_evt: React.MouseEvent<any>) => receiver.cancel(), [receiver]);
+	const onSubmit = React.useCallback(
+		(evt: React.FormEvent<HTMLFormElement>) => {
+			evt.preventDefault();
+			if (fileInputRef.current != null) {
+				receiver.createSubmitHandler(fileInputRef.current, 'react')(evt);
+			} else {
+				dispatch({
+					type: 'SET_ERROR',
+					payload: { error: new Error('File input file <input name="..." /> wasn\'t found') },
+				});
+			}
+		},
+		[receiver],
+	);
 
 	return {
-		fileIdInputRef,
-		fileInputRef,
-		formRef,
-		imageRef,
-		orbitEntityData,
-		onCancel,
-		progressRef,
+		error: state.error,
+		file: state.file,
+		fileInputRef: fileInputRef,
+		formRef: formRef,
+		imageSrc: state.imageSrc ?? undefined,
+		onCancel: onCancel,
+		onSubmit: onSubmit,
+		orbitEntityData: state.initMessage?.entityData ?? {},
+		orbitFileId: state.orbitFileId ?? undefined,
+		progress: state.progress ?? undefined,
+		setError: setError,
+		status: state.status,
 	};
 }

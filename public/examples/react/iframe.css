@@ -37,13 +37,13 @@ img {
 	border-radius: 8px;
 	border: 4px solid transparent;
 	box-shadow: 0 0 0 3px #666;
-	display: none;
+	display: block;
 	grid-column: 2 / 3;
 	height: auto;
 	justify-self: center;
 	margin-top: 0.5rem;
 	max-height: 300px;
-	max-width: 100%;
+	max-width: calc(100% - 16px);
 	width: auto;
 }
 [data-orbit-file-receiver-error-container] {

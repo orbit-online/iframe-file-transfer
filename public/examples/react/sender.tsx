@@ -68,7 +68,14 @@ const initialState: State = {
     "projectEnd": "2023-09-30",
     "projectName": "Project/Reference with beautiful pictures",
     "projectStart": "2023-03-01",
-    "variationId": 43132
+    "variationId": 43132,
+    "user": {
+        "id": 32,
+        "email": "john@doe.org",
+        "externalId:": "DK4389SA",
+        "name": "John Doe",
+        "initials": "jodo"
+    }
 }`,
 	file: null,
 	iframeUrl: IFRAME_URL,

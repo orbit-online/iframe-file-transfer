@@ -31,7 +31,7 @@ export function querySelectorOne<TElement extends Element = Element>(selector: s
 	}
 }
 
-interface OrbitInitMessage {
+export interface OrbitInitMessage {
 	readonly apiVersion: number;
 	readonly entityData: Record<string, any>;
 	readonly event: 'online.orbit::iframe_file_transfer#init';

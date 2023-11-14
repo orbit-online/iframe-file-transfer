@@ -43,16 +43,15 @@ async function onOrbitFileReceiverFormSubmit(
 }
 
 const App = (_props: AppProps) => {
-	const [error, setError] = React.useState<Maybe<Error>>(null);
-	const { formRef, fileIdInputRef, fileInputRef, imageRef, onCancel, orbitEntityData, progressRef } =
-		useOrbitIframeFileTransferReceiver(setError, onOrbitFileReceiverFormSubmit);
+	const { error, file, fileInputRef, formRef, imageSrc, orbitEntityData, orbitFileId, onCancel, onSubmit, progress } =
+		useOrbitIframeFileTransferReceiver(onOrbitFileReceiverFormSubmit);
 
 	const errorContainer = error == null ? null : <div style={errorContainerStyles}>{error.message}</div>;
 
 	return (
-		<form action="/upload" encType="multipart/form-data" method="post" ref={formRef}>
+		<form action="/upload" encType="multipart/form-data" method="post" onSubmit={onSubmit} ref={formRef}>
 			{errorContainer}
-			<input type="hidden" name="orbitFileId" ref={fileIdInputRef} required />
+			<input type="hidden" name="orbitFileId" value={orbitFileId} readOnly required />
 			<label>
 				<span>Project number</span>
 				<input type="text" readOnly name="projectNumber" value={orbitEntityData.externalId} />
@@ -71,9 +70,9 @@ const App = (_props: AppProps) => {
 			</label>
 			<label>
 				<span>File</span>
-				<input ref={fileInputRef} name="file" required disabled type="text" />
-				<progress ref={progressRef} max="100" value="0"></progress>
-				<img ref={imageRef} style={{ display: 'none' }} />
+				<input value={file?.name} name="file" ref={fileInputRef} required disabled type="text" />
+				<progress max="100" value={progress}></progress>
+				{imageSrc == null ? null : <img src={imageSrc} />}
 			</label>
 
 			<label>
@@ -91,7 +90,8 @@ const App = (_props: AppProps) => {
 			</label>
 
 			<div style={{ gridColumn: '2 / 3', justifySelf: 'end' }}>
-				<input type="button" value="Cancel" onClick={onCancel} /> <input type="submit" value="Upload" />
+				<input type="button" value="Cancel" onClick={onCancel} />
+				<input type="submit" value="Upload" />
 			</div>
 
 			<div style={{ display: 'flex', flexDirection: 'column', gridColumn: '1 / 3' }}>
