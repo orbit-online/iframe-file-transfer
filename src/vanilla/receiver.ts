@@ -188,7 +188,8 @@ window.addEventListener(
 				logger.debug('<pre /> Entity data container found.');
 			}
 
-			fileIdInput.disabled = true;
+			fileIdInput.readOnly = true;
+			fileIdInput.required = true;
 			fileInput.setAttribute('type', 'text');
 			fileInput.disabled = true;
 			fileInput.required = true;
