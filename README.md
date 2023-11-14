@@ -235,17 +235,17 @@ function useOrbitIframeFileTransferReceiver(submitHandler): {
 
 -   `submitHandler` argument
     The submit handler is called with the data from the form input fields, along with metadata from Orbit.
-    It is expected that submit handler posts the data to the server returns`Promise`that resolves when
-    the submission is successful or throws an error (returns a`Promse` that rejects) if something went wrong.
+    It is expected that submit handler posts the data to the server returns a `Promise` that resolves when
+    the submission is successful or throw an error (return a `Promse` that rejects) if something went wrong.
 
-            ```ts
-            async function onOrbitFileReceiverFormSubmit(
-            	url: string,
-            	method: string,
-            	formData: FormData,
-            	_orbitEntityData: Record<string, any>,
-            ): Promise<void> {}
-            ```
+    ```ts
+    async function onOrbitFileReceiverFormSubmit(
+    	url: string,
+    	method: string,
+    	formData: FormData,
+    	_orbitEntityData: Record<string, any>,
+    ): Promise<void> {}
+    ```
 
 -   `formRef` and `onSubmit`  
     The ref that should be passed along to the form element, in order to the form submission/interception and `formData` "patch-up" to work.
