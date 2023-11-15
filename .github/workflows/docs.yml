@@ -2,7 +2,7 @@
 #
 # To get started with Next.js see: https://nextjs.org/docs/getting-started
 #
-name: Deploy docs submotule Next.js site to Pages
+name: Deploy docs
 
 on:
   # Runs on pushes targeting the default branch
