@@ -22,6 +22,7 @@ interface IframeHandlerOptions {
 	readonly onError: (err: Error) => void;
 	readonly orbitFileId: string;
 	readonly throttle?: number;
+	readonly timeoutMillis?: number;
 }
 type IframeHandlerArgs = readonly [
 	file: Maybe<File>,
@@ -39,7 +40,7 @@ type HandlerParams = readonly [params: IframeHandlerOptions] | IframeHandlerArgs
 export function createIframeHandler(options: IframeHandlerOptions): Maybe<IframeHandler>;
 export function createIframeHandler(...params: IframeHandlerArgs): Maybe<IframeHandler>;
 export function createIframeHandler(...p: HandlerParams): Maybe<IframeHandler> {
-	const [file, orbitFileId, entityData, onComplete, onCancel, chunkSize, throttle, onError] =
+	const [file, orbitFileId, entityData, onComplete, onCancel, chunkSize, throttle, onError, timeoutMillis] =
 		p.length === 1
 			? [
 					p[0].file,
@@ -50,6 +51,7 @@ export function createIframeHandler(...p: HandlerParams): Maybe<IframeHandler> {
 					p[0].chunkSize,
 					p[0].throttle,
 					p[0].onError,
+					p[0].timeoutMillis,
 			  ]
 			: p;
 
@@ -139,11 +141,12 @@ export function createIframeHandler(...p: HandlerParams): Maybe<IframeHandler> {
 		}
 	};
 
+	const timeout = timeoutMillis ?? 5000;
 	Promise.race([
 		deferred.promise,
 		rejectAfter(
-			5000,
-			'Connection to external service (iframe) could not be established within 5000ms',
+			timeout,
+			`Connection to external service (iframe) could not be established within ${timeout}ms`,
 			OrbitIframeFileSenderError,
 		),
 	]).catch(onError);
